@@ -9,11 +9,11 @@
 #ifndef WORK3_STRUCT_H
 #define WORK3_STRUCT_H
 
-/*!
+/*!s
  * \brief Страна
  */
 typedef struct{
-    char* name; /*!< Название страны */
+    char name[100]; /*!< Название страны */
     long population; /*!< Население страны */
     long area; /*!< Общая площадь страны */
 }Country;

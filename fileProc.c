@@ -1,10 +1,8 @@
-#include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
-#include<fcntl.h>
+#include <fcntl.h>
 #include <string.h>
 #include"countries.c"
 
@@ -138,11 +136,13 @@ int inputCountryNumber(int counter){
 
 void modifyRecord()
 {
-    // Country country;
     struct iovec iov[3]; // Массив структур iovec для векторной записи
-    iov[0].iov_base = NULL;
+    Country country;
+    iov[0].iov_base = country.name;
     iov[0].iov_len = 100; 
+    iov[1].iov_base = &country.area; 
     iov[1].iov_len = sizeof(long); 
+    iov[2].iov_base = &country.population;
     iov[2].iov_len = sizeof(long); 
     char* fileName = inputFileName();
     int fileDescriptor = openFile(2, fileName);
@@ -179,8 +179,8 @@ void modifyRecord()
         }
         if(command == 1){
             printf("Please, enter the country name: ");
-            char* name = GetString();
-            iov[0].iov_base = name; 
+            scanf("%s", country.name);
+            iov[0].iov_base = country.name; 
             iov[0].iov_len = 100;
         }
         else if(command == 2){
@@ -214,6 +214,113 @@ void modifyRecord()
         }
         close(fileDescriptor); // Закрываем файл
         printf("Предприятие успешно изменено.\n");
+    }
+}
+
+void DeleteRecord()
+{
+    int number;
+    long count;
+    char buffer[100 + sizeof(long) * 2]; // Буфер для хранения данных 
+    struct iovec iov[1]; // Массив структур iovec для векторной чтения/записи
+
+    int fileOpen = 0;
+    int fileDescriptor = -1;
+    char fileName[100];
+
+    while (fileDescriptor == -1)
+    {
+        printf("Введите имя файла (Q - для выхода): ");
+        scanf("%s", fileName);
+
+        int len = strlen(fileName);
+        char* ext = fileName + len - 4;
+
+        if (strcmp(ext, ".txt") == 0 || strcmp(ext, ".bin") == 0)
+        {
+            fileDescriptor = open(fileName, O_RDWR);
+
+            long tmpCount = countRecords(fileName);
+
+            if (tmpCount == 0)
+            {
+                printf("Файл пустой.\n");
+                fileOpen = -1;
+            }
+
+            if (fileDescriptor == -1)
+            {
+                printf("Такого файла нет! Попробуйте снова.\n");
+            }
+        }
+        else
+        {
+            if (strcmp(fileName, "Q") == 0)
+            {
+                fileOpen = -1;
+                break;
+            }
+            printf("Неверное расширение файла! Попробуйте снова\n");
+        }
+    }
+
+    if (fileOpen == 0)
+    {
+        count = countRecords(fileName);
+
+        
+        number = inputCountryNumber(count);
+
+        for(int i=number;i<count;i++)
+        {
+            // Цикл по всем последующим записям
+
+            if (lseek(fileDescriptor,i*(100+sizeof(long)*2),SEEK_SET)==-1)
+            {
+                // Перемещаем указатель позиции в файле на начало текущей записи
+                // и проверяем успешность операции
+                perror("Ошибка перемещения в файле");
+                exit(1);
+            }
+
+            iov[0].iov_base = buffer; // Указатель на данные в буфере
+            iov[0].iov_len = 100+sizeof(long)*2; // Размер данных в буфере в байтах
+
+            if(readv(fileDescriptor,iov,1)==-1)
+            {
+                // Выполняем векторное чтение из файла в массив структур iovec
+                // и проверяем успешность операции
+                perror("Ошибка чтения из файла");
+                exit(1);
+            }
+
+            if(lseek(fileDescriptor,(i-1)*(100+sizeof(long)*2),SEEK_SET)==-1)
+            {
+                // Перемещаем указатель позиции в файле на начало предыдущей
+                // позиции и проверяем успешность операции
+                perror("Ошибка перемещения в файле");
+                exit(1);
+            }
+
+            if(writev(fileDescriptor,iov,1)==-1)
+            {
+                // Выполняем векторную запись из массива структур iovec в файл
+                // и проверяем успешность операции
+                perror("Ошибка записи в файл");
+                exit(1);
+            }
+        }
+
+        if(ftruncate(fileDescriptor,(count-1)*(100+sizeof(long)*2))==-1)
+        {
+            // Уменьшаем размер файла на одну запись и проверяем успешность операции
+            perror("Ошибка изменения размера файла");
+            exit(1);
+        }
+
+        close(fileDescriptor); // Закрываем файл
+
+        printf("Предприятие успешно удалено.\n");
     }
 }
 

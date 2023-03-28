@@ -41,7 +41,7 @@ int main(){
         }
         else if(command == 3)
         {
-            deleteCountry(&head);
+            DeleteRecord();
         }
         else if(command == 4)
         {

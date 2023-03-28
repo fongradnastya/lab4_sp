@@ -6,8 +6,10 @@
 
 Country getCountry()
 {
+    Country newCountry;
     printf("Please, enter the country name: ");
-    char* name = GetString();
+    scanf("%s", newCountry.name);
+    getchar();
     long population;
     int res = 0;
     while(res != 1)
@@ -38,8 +40,6 @@ Country getCountry()
             printf("This value should be positive!\n");
         }
     }
-    Country newCountry;
-    newCountry.name = name;
     newCountry.area = area;
     newCountry.population = population;
     return newCountry;
@@ -203,7 +203,6 @@ void changeCountry(Node** head)
         {
             printf("Please, enter the country name: ");
             char* name = GetString();
-            node->value.name = name;
         }
         else if(command == 2)
         {
