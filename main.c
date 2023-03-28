@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include<stdlib.h>
-#include"struct.h"
-#include"countries.c"
 #include"fileProc.c"
 #include"main.h"
 
@@ -35,12 +33,10 @@ int main(){
         }
         if(command == 1)
         {
-            Country country = getCountry();
-            append("file.txt", country);
+            addRecord();
         }
         else if(command == 2)
         {
-            changeRecord("file.txt");
         }
         else if(command == 3)
         {
@@ -48,7 +44,7 @@ int main(){
         }
         else if(command == 4)
         {
-            printAll("file.txt");
+
         }
         else if(command == 5)
         {
