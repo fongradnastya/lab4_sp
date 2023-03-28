@@ -18,14 +18,4 @@ typedef struct{
     long area; /*!< Общая площадь страны */
 }Country;
 
-/*!
- * \brief Узел односвязного списка
- */
-typedef struct Node{
-    Country value; /*!< Значение узла */
-    struct Node* next; /*!< Ссылка на следующий узел */
-}Node;
-
-
-
 #endif

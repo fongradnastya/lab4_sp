@@ -17,7 +17,8 @@ void saveCountry(Country country, struct iovec * iov [])
     (*iov)[2].iov_len = sizeof(long);
 }
 
-long inputPopulation(){
+long inputPopulation()
+{
     long population;
     int res = 0;
     while(res != 1)
@@ -36,7 +37,8 @@ long inputPopulation(){
     return population;
 }
 
-long inputCountryArea(){
+long inputCountryArea()
+{
     long area;
     int res = 0;
     while(res != 1)
@@ -81,7 +83,8 @@ void printCountry(Country country)
     printf("population: %ld people, area: %ld units\n", country.population, country.area);
 }
 
-char* inputFileName(){
+char* inputFileName()
+{
     char* fileName;
     int res = 0;
     while(res != 1)
@@ -137,18 +140,22 @@ long countRecords(char* fileName)
     return count;
 }
 
-int inputCountryNumber(int counter){
+int inputCountryNumber(int counter)
+{
     int number;
     printf("There are %d countries in the file\n", counter);
     int res = 0;
-    while(res != 1){
+    while(res != 1)
+    {
         printf("Please, enter a country number: ");
         res = InputInt(&number);
-        if(number > counter){
+        if(number > counter)
+        {
             printf("This number is too big. Please, try again\n");
             res = 0;
         }
-        else if ( res == -1){
+        else if ( res == -1)
+        {
             printf("This value should be positive\n");
         }
     }
@@ -335,7 +342,8 @@ void readRecord()
     }
 }
 
-void readAllRecords() {
+void readAllRecords()
+{
     Country country;
     struct iovec iov[3]; 
     int count = 0; // счетчик записей
@@ -414,7 +422,6 @@ void getTheMostPopulous()
             }
         }
         close(fileDescriptor);
-
         printf("The highest density is %ld\n ", maxDensity);
         printf("Countries:\n");
         fileDescriptor = open(fileName, O_RDONLY);
@@ -424,7 +431,7 @@ void getTheMostPopulous()
             ssize_t bytesRead = readv(fileDescriptor, iov, 3); // выполнить векторное чтение из файла
             if (bytesRead == -1)
             { // проверить успешность операции чтения
-                perror("Ошибка чтения из файла");
+                perror("File reading error");
                 exit(1);
             }
             if (bytesRead == 0)
@@ -440,11 +447,6 @@ void getTheMostPopulous()
         }
         close(fileDescriptor); // закрыть файл
     }
-}
-
-void sortRecords()
-{
-     
 }
 
 void getHighPopulate()
