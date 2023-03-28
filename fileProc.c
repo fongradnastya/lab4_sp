@@ -4,8 +4,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
-#include"input.c"
+#include"input.h"
 #include"struct.h"
+#include"fileProc.h"
 
 void saveCountry(Country country, struct iovec * iov [])
 {

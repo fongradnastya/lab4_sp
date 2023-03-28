@@ -7,6 +7,7 @@
 
 #ifndef FILE_PROC_H
 #define FILE_PROC_H
+#include"struct.h"
 
 /*!
 * \brief Получает от пользователя популяцию страны

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include<stdlib.h>
-#include"fileProc.c"
+#include"fileProc.h"
 #include"main.h"
 
 
