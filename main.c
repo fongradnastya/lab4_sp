@@ -37,6 +37,7 @@ int main(){
         }
         else if(command == 2)
         {
+            modifyRecord();
         }
         else if(command == 3)
         {
@@ -44,7 +45,7 @@ int main(){
         }
         else if(command == 4)
         {
-
+            readAllRecords();
         }
         else if(command == 5)
         {

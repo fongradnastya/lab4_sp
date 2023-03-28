@@ -55,7 +55,7 @@ void addRecord()
     iov[2].iov_len = sizeof(long); 
     
     char* fileName = inputFileName();
-    int fileDescriptor = openFile(1, fileName);
+    int fileDescriptor = open(fileName, O_WRONLY | O_APPEND | O_CREAT, 0666);
 
     if (writev(fileDescriptor, iov, 3) == -1)
     {
@@ -132,13 +132,14 @@ int inputCountryNumber(int counter){
             printf("This value should be positive\n");
         }
     }
+    printf("%d\n", number);
     return number;
 }
 
 void modifyRecord()
 {
     // Country country;
-    struct iovec iov[4]; // Массив структур iovec для векторной записи
+    struct iovec iov[3]; // Массив структур iovec для векторной записи
     iov[0].iov_base = NULL;
     iov[0].iov_len = 100; 
     iov[1].iov_len = sizeof(long); 
@@ -160,7 +161,7 @@ void modifyRecord()
             perror("Seaking file error");
             exit(1);
         }
-        if (readv(fileDescriptor, iov, 4) == -1)
+        if (readv(fileDescriptor, iov, 3) == -1)
         {
             // Выполняем векторное чтение из файла в массив структур iovec
             // и проверяем успешность операции
@@ -206,7 +207,7 @@ void modifyRecord()
             perror("Ошибка перемещения в файле");
             exit(1);
         }
-        if (writev(fileDescriptor, iov, 4) == -1)
+        if (writev(fileDescriptor, iov, 3) == -1)
         {
             perror("Ошибка записи в файл");
             exit(1);
@@ -219,7 +220,7 @@ void modifyRecord()
 void ReadRecord()
 {
     Country country;
-    struct iovec iov[4];
+    struct iovec iov[3];
     char* fileName = inputFileName();
     int fileDescriptor = open(fileName, O_RDONLY);
     if (fileDescriptor == -1)
@@ -249,5 +250,49 @@ void ReadRecord()
         }
         close(fileDescriptor);
         printCountry(country); 
+    }
+}
+
+void readAllRecords() {
+    Country country;
+    struct iovec iov[3]; 
+    int count = 0; // счетчик записей
+    char* fileName = inputFileName();
+    int fileDescriptor = open(fileName, O_RDONLY);
+    if (fileDescriptor == -1)
+    {
+        printf("No file with such name\n");
+    }
+    else
+    {
+        while (1)
+        { 
+            iov[0].iov_base = country.name;
+            iov[0].iov_len = 100; 
+            iov[1].iov_base = &country.area; 
+            iov[1].iov_len = sizeof(long); 
+            iov[2].iov_base = &country.population;
+            iov[2].iov_len = sizeof(long); 
+
+            // Выполняем векторное чтение из файла в массив структур iovec и
+            // сохраняем количество прочитанных байтов
+            ssize_t bytesRead = readv(fileDescriptor, iov, 3);
+            if (bytesRead == -1)
+            { // Проверяем успешность операции чтения
+                perror("Ошибка чтения из файла");
+                exit(1);
+            }
+            if (bytesRead == 0)
+            { 
+                break;
+            }
+            count++; // Увеличиваем счетчик записей
+            printCountry(country);
+        }
+        close(fileDescriptor);
+        if (count == 0)
+        {
+            printf("Файл пуст.\n");
+        }
     }
 }
