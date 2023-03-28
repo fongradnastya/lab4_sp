@@ -7,6 +7,16 @@
 #include"input.c"
 #include"struct.h"
 
+void saveCountry(Country country, struct iovec * iov [])
+{
+    (*iov)[0].iov_base = country.name;
+    (*iov)[0].iov_len = 100; 
+    (*iov)[1].iov_base = &country.area; 
+    (*iov)[1].iov_len = sizeof(long); 
+    (*iov)[2].iov_base = &country.population;
+    (*iov)[2].iov_len = sizeof(long);
+}
+
 long inputPopulation(){
     long population;
     int res = 0;
@@ -71,7 +81,6 @@ void printCountry(Country country)
     printf("population: %ld people, area: %ld units\n", country.population, country.area);
 }
 
-
 char* inputFileName(){
     char* fileName;
     int res = 0;
@@ -117,7 +126,6 @@ void addRecord()
     close(fileDescriptor); // Закрываем файл
     printf("The record has been added successfully.\n");
 }
-
 
 long countRecords(char* fileName)
 {
@@ -194,6 +202,7 @@ void modifyRecord()
         if(command == 1){
             printf("Please, enter the country name: ");
             scanf("%s", country.name);
+            getchar();
             iov[0].iov_base = country.name; 
             iov[0].iov_len = 100;
         }
@@ -365,4 +374,117 @@ void readAllRecords() {
             printf("This file is emptry\n");
         }
     }
+}
+
+void getTheMostPopulous()
+{
+    Country country;
+    struct iovec iov[3];
+    long maxDensity = 0;
+    char* fileName = inputFileName();
+    int fileDescriptor = open(fileName, O_RDONLY);
+    int tmpCount = countRecords(fileName);
+    if (tmpCount == 0)
+    {
+        printf("Файл пустой.\n");
+    }
+    else{
+        while (1)
+        { // бесконечный цикл
+            iov[0].iov_base = country.name;
+            iov[0].iov_len = 100; 
+            iov[1].iov_base = &country.area; 
+            iov[1].iov_len = sizeof(long); 
+            iov[2].iov_base = &country.population;
+            iov[2].iov_len = sizeof(long); 
+            ssize_t bytesRead = readv(fileDescriptor, iov, 3); // выполнить векторное чтение из файла
+            if (bytesRead == -1)
+            {
+                perror("Ошибка чтения из файла");
+                exit(1);
+            }
+            if (bytesRead == 0)
+            {
+                break;
+            }
+            long density = country.population / country.area;
+            if (maxDensity < density || maxDensity == 0)
+            { // Если соотношение лучше или еще не определено
+                maxDensity = density ; // Обновляем лучшее соотношение
+            }
+        }
+        close(fileDescriptor);
+
+        printf("The highest density is %ld\n ", maxDensity);
+        printf("Countries:\n");
+        fileDescriptor = open(fileName, O_RDONLY);
+        while (1)
+        { // бесконечный цикл
+            saveCountry(country, &iov);
+            ssize_t bytesRead = readv(fileDescriptor, iov, 3); // выполнить векторное чтение из файла
+            if (bytesRead == -1)
+            { // проверить успешность операции чтения
+                perror("Ошибка чтения из файла");
+                exit(1);
+            }
+            if (bytesRead == 0)
+            { // проверить конец файла
+                break;
+            }
+            long density = country.population / country.area;
+            if (density == maxDensity)
+            { // Если соотношение совпадает с лучшим
+                printCountry(country);
+                // Выводим название предприятия
+            }
+        }
+        close(fileDescriptor); // закрыть файл
+    }
+}
+
+void sortRecords()
+{
+     
+}
+
+void getHighPopulate()
+{
+    Country country;
+    struct iovec iov[3];
+    long maxDensity = 0;
+    char* fileName = inputFileName();
+    int fileDescriptor = open(fileName, O_RDONLY);
+    int tmpCount = countRecords(fileName);
+    if (tmpCount == 0)
+    {
+        printf("This file is empty\n");
+    }
+    else{
+        long minPopulation = inputPopulation();
+        while (1)
+        { // бесконечный цикл
+            iov[0].iov_base = country.name;
+            iov[0].iov_len = 100; 
+            iov[1].iov_base = &country.area; 
+            iov[1].iov_len = sizeof(long); 
+            iov[2].iov_base = &country.population;
+            iov[2].iov_len = sizeof(long); 
+            ssize_t bytesRead = readv(fileDescriptor, iov, 3); // выполнить векторное чтение из файла
+            if (bytesRead == -1)
+            {
+                perror("File reading error");
+                exit(1);
+            }
+            if (bytesRead == 0)
+            {
+                break;
+            }
+            if (country.population >= minPopulation)
+            {
+                printCountry(country);
+            }
+        }
+        close(fileDescriptor);
+    }
+
 }

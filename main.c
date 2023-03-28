@@ -52,10 +52,11 @@ int main(){
         }
         else if(command == 6)
         {
-        
+            getTheMostPopulous();
         }
         else if(command == 7)
         {
+            getHighPopulate();
         }
         else if(command == 8)
         {
