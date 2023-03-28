@@ -10,8 +10,8 @@ void printMenu()
     printf("1 - to add a new record\n");
     printf("2 - to modify a record\n");
     printf("3 - to delete a record\n");
-    printf("4 - to read a record\n");
-    printf("5 - to show records\n");
+    printf("4 - to show all the records\n");
+    printf("5 - to read a record\n");
     printf("6 - to get a list of the most populous countries\n");
     printf("7 - to sort countries by their population\n");
     printf("8 - to exit\n");
@@ -19,7 +19,6 @@ void printMenu()
 }
 
 int main(){
-    Node* head = NULL;
     int end = 0;
     while(end == 0)
     {
@@ -41,7 +40,7 @@ int main(){
         }
         else if(command == 3)
         {
-            DeleteRecord();
+            deleteRecord();
         }
         else if(command == 4)
         {
@@ -49,19 +48,17 @@ int main(){
         }
         else if(command == 5)
         {
-            findCountry(head);
+            readRecord();
         }
         else if(command == 6)
         {
-            getTheMostPopulous(head);
+        
         }
         else if(command == 7)
         {
-            getHightPopulate(head);
         }
         else if(command == 8)
         {
-            freeCountries(head);
             end = 1;
         }
     }
