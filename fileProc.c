@@ -69,11 +69,13 @@ void addRecord()
 }
 
 
-long countRecords(int fileDescriptor)
+long countRecords(char* fileName)
 {
     long count;
+    int fileDescriptor = open(fileName, O_RDONLY);
     int recordLen = 100 + sizeof(long) * 2; 
     count = lseek(fileDescriptor, 0, SEEK_END) / recordLen;
+    close(fileDescriptor);
     return count;
 }
 
@@ -112,36 +114,45 @@ long inputCountryArea(){
             printf("This value should be positive!\n");
         }
     }
+    return area;
+}
+
+int inputCountryNumber(int counter){
+    int number;
+    printf("There are %d countries in the file\n", counter);
+    int res = 0;
+    while(res != 1){
+        printf("Please, enter a country number: ");
+        res = InputInt(&number);
+        if(number > counter){
+            printf("This number is too big. Please, try again\n");
+            res = 0;
+        }
+        else if ( res == -1){
+            printf("This value should be positive\n");
+        }
+    }
+    return number;
 }
 
 void modifyRecord()
 {
-    int number; // Номер записи для модификации
-    int choice; // Выбор пользователя для модификации полей
-    Country country;
+    // Country country;
     struct iovec iov[4]; // Массив структур iovec для векторной записи
+    iov[0].iov_base = NULL;
+    iov[0].iov_len = 100; 
+    iov[1].iov_len = sizeof(long); 
+    iov[2].iov_len = sizeof(long); 
     char* fileName = inputFileName();
     int fileDescriptor = openFile(2, fileName);
-    int counter = countRecords(fileDescriptor);
+    int counter = countRecords(fileName);
     if(counter == 0)
     {
         printf("This file is empty. Nothing to modify");
     }
     else
     {
-        printf("There are %ld countries in the file\n", counter);
-        int res = 0;
-        while(res != 1){
-            printf("Please, enter a country number: ");
-            res = InputInt(&number);
-            if(number > counter){
-                printf("This number is too big. Please, try again\n");
-                res = 0;
-            }
-            else if ( res == -1){
-                printf("This value should be positive\n");
-            }
-        }
+        int number = inputCountryNumber(counter);
         int pos = (number - 1) * (100 + sizeof(long) * 2);
         if (lseek(fileDescriptor, pos, SEEK_SET) == -1)
         {
@@ -165,56 +176,78 @@ void modifyRecord()
             printf("Your command: ");
             res = InputInt(&command);
         }
-        switch(command)
-        {
-            case 1:
-                printf("Please, enter the country name: ");
-                char* name = GetString();
-                iov[0].iov_base = name; 
-                iov[0].iov_len = 100;
-                break;
-            case 2:
-                long area = inputCountryArea();
-                iov[1].iov_base = area; 
-                iov[1].iov_len = sizeof(long);
-                break;
-            case 3: // Модификация поля цена
-                long population = inputPopulation();
-                iov[2].iov_base = population;
-                iov[2].iov_len = sizeof(long);
-                break;
-            default:
-                printf("Wrong command\n");
-                return;
+        if(command == 1){
+            printf("Please, enter the country name: ");
+            char* name = GetString();
+            iov[0].iov_base = name; 
+            iov[0].iov_len = 100;
         }
-
+        else if(command == 2){
+            long area = inputCountryArea();
+            iov[1].iov_base = &area; 
+            iov[1].iov_len = sizeof(long);
+        }
+        else if(command == 3){
+            long population = inputPopulation();
+                iov[2].iov_base = &population;
+                iov[2].iov_len = sizeof(long);
+        }
+        else{
+            printf("Wrong command\n");
+        }
         fileDescriptor = open(fileName, O_WRONLY); // Открываем файл для записи
-
         if (fileDescriptor == -1)
         {
-            // Проверяем успешность открытия файла
             perror("Ошибка открытия файла");
             exit(1);
         }
-        int pos = (number - 1) * (100 + sizeof(long) * 2);
         if (lseek(fileDescriptor, pos, SEEK_SET) == -1)
         {
-            // Перемещаем указатель позиции в файле на начало нужной записи
-            // и проверяем успешность операции
             perror("Ошибка перемещения в файле");
             exit(1);
         }
-
         if (writev(fileDescriptor, iov, 4) == -1)
         {
-            // Выполняем векторную запись из массива структур iovec в
-            // файл и проверяем успешность операции
             perror("Ошибка записи в файл");
             exit(1);
         }
-
         close(fileDescriptor); // Закрываем файл
-
         printf("Предприятие успешно изменено.\n");
+    }
+}
+
+void ReadRecord()
+{
+    Country country;
+    struct iovec iov[4];
+    char* fileName = inputFileName();
+    int fileDescriptor = open(fileName, O_RDONLY);
+    if (fileDescriptor == -1)
+    {
+        printf("No file with such name\n");
+    }
+    else
+    {
+        int count = countRecords(fileName);
+        int number = inputCountryNumber(count);
+        int pos = (100 + sizeof(long) * 2) * (number - 1);
+        if (lseek(fileDescriptor, pos, SEEK_SET) == -1)
+        {
+            perror("Ошибка перемещения в файле");
+            exit(1);
+        }
+        iov[0].iov_base = country.name;
+        iov[0].iov_len = 100; 
+        iov[1].iov_base = &country.area; 
+        iov[1].iov_len = sizeof(long); 
+        iov[2].iov_base = &country.population;
+        iov[2].iov_len = sizeof(long); 
+        if (readv(fileDescriptor, iov, 4) == -1)
+        {
+            perror("Ошибка чтения из файла");
+            exit(1);
+        }
+        close(fileDescriptor);
+        printCountry(country); 
     }
 }
