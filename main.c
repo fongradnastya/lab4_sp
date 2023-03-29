@@ -1,3 +1,8 @@
+/*!
+ * \file main.c
+ * \brief Файл для запуска основной логики программы
+ */
+
 #include <stdio.h>
 #include<stdlib.h>
 #include"fileProc.h"

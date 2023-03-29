@@ -1,3 +1,8 @@
+/*!
+ * \file fileProc.c
+ * \brief Основные функции для работы с векторным чтением и записью
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/uio.h>

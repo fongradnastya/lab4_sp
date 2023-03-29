@@ -1,3 +1,7 @@
+/*!
+ * \file input.c
+ * \brief Основные функции для считывания данных из консоли
+ */
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
